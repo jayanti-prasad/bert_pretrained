@@ -1,4 +1,5 @@
 import os
+import shutil
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.layers import Dense,Dropout, Input
@@ -6,15 +7,21 @@ from tensorflow.keras.callbacks import ModelCheckpoint, TensorBoard
 from tensorflow.keras import regularizers
 from transformers import *
 from transformers import TFDistilBertModel,DistilBertTokenizer,DistilBertConfig
+from transformers import AutoModelForSequenceClassification
+from transformers import AutoTokenizer
 
 max_len, num_classes = 32, 2
+
+#dbert_tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+#dbert_model = AutoModelForSequenceClassification.from_pretrained("bert-base-uncased")
+
+
 # get tokenizer
 dbert_tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-# get model
 dbert_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased')
 
 
-def bert_preproc (sentences, labels):
+def bert_preproc (sentences):
     # Prepare the model input
     input_ids = []
     attention_masks = []
@@ -27,8 +34,7 @@ def bert_preproc (sentences, labels):
 
     input_ids = np.asarray(input_ids)
     attention_masks = np.array(attention_masks)
-    labels = np.array(labels)
-    return input_ids, attention_masks, labels
+    return input_ids, attention_masks
 
 
 def bert_model ():
@@ -55,6 +61,10 @@ class BERT_Classification:
 
     def bert_train (self, workspace, train_inp, train_mask, train_label, val_inp, val_mask, val_label,num_epochs):
         log_dir = workspace + os.sep + 'log'
+    
+        if os.path.exists(log_dir) and os.path.isdir(log_dir):
+            shutil.rmtree(log_dir)
+
         os.makedirs(log_dir, exist_ok=True)
         model_save_path = workspace + os.sep +  'dbert_model.h5'
         chkpt = ModelCheckpoint(filepath = model_save_path, save_weights_only=True, monitor='val_loss',

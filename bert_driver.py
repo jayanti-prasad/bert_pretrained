@@ -1,6 +1,7 @@
 import os
 import argparse
 import sys
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.utils import shuffle
@@ -82,10 +83,12 @@ if __name__ == "__main__":
     max_len = 32
     sentences = data['text']
     labels = data['label'].to_list()
+    labels = np.array(labels)
     print(len(sentences), len(labels))
     print("labels=",labels)
     #sys.exit()
-    input_ids, attention_masks, labels = bert_preproc (sentences, labels)
+
+    input_ids, attention_masks  = bert_preproc (sentences)
 
     label_class_dict = {0: 'n', 1: 'y'}
     target_names = label_class_dict.values()
